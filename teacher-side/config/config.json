@@ -1,0 +1,10 @@
+{
+  "database_config": {
+    "mongo_config": {
+      "db_address": "mongodb://@localhost:27017",
+      "db_name": "musicX",
+      "time_out": 5,
+      "music_info_collection": "musicInfo"
+    }
+  }
+}
