@@ -20,7 +20,7 @@
 
   ```json
   {
-      "student-password": "(string)",
+      "student_password": "(string)",
   }
   ```
 
@@ -97,3 +97,4 @@
 * 更改签到状态
 
   `func  ChangeStudentSignStatus(studentId, className, classStartDate, targetSignStatus) (bool, error) {}`
+
