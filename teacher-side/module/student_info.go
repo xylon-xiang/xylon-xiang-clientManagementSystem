@@ -1,42 +1,49 @@
 package module
 
+//////////////////////////////////////
+// codes below are as import format //
+//////////////////////////////////////
+
 // teacher upload data format
 type ClassInfo struct {
-	ClassName    string        `json:"class_name"`
-	ClassDate    int64         `json:"class_date"`
-	StudentsInfo []StudentInfo `json:"students_info"`
+	ClassName      string        `json:"class_name" bson:"class_name"`
+	ClassStartDate int64         `json:"class_start_date" bson:"class_start_date"`
+	ClassOverDate  int64         `json:"class_over_date" bson:"class_over_date"`
+	StudentsInfo   []StudentInfo `json:"students_info" bson:"students_info"`
 }
 
 type StudentInfo struct {
-	StudentId       string `json:"student_id"`
-	StudentName     string `json:"student_name"`
-	StudentPassword string `json:"student_password"`
+	StudentId       string `json:"student_id" bson:"student_id"`
+	StudentName     string `json:"student_name" bson:"student_name"`
+	StudentPassword string `json:"student_password" bson:"student_password"`
 }
+
+//////////////////////////////////////
+// codes above are as import format //
+//////////////////////////////////////
 
 // database saving format
 type StudentStatus struct {
 	// class info
-	ClassName      string `json:"class_name"`
-	ClassStartDate int64  `json:"class_start_date"`
-	ClassOverDate  int64  `json:"class_over_date"`
+	ClassName      string `json:"class_name" bson:"class_name"`
+	ClassStartDate int64  `json:"class_start_date" bson:"class_start_date"`
+	ClassOverDate  int64  `json:"class_over_date" bson:"class_over_date"`
 
 	// student info
-	StudentId       string `json:"student_id"`
-	StudentName     string `json:"student_name"`
-	StudentPassword string `json:"student_password"`
+	StudentInfo
 
 	// sign info
-	SignInDate  int64 `json:"sign_in_date"`
-	SignOutDate int64 `json:"sign_out_date"`
-	SignStatus  int   `json:"sign_status"`
+	SignInDate  int64 `json:"sign_in_date" bson:"sign_in_date"`
+	SignOutDate int64 `json:"sign_out_date" bson:"sign_out_date"`
+	SignStatus  int   `json:"sign_status" bson:"sign_status"`
 
 	// homework info
-	HomeworksInfo []HomeworkInfo `json:"homeworks_info"`
+	HomeworksInfo []HomeworkInfo `json:"homeworks_info" bson:"homeworks_info"`
 }
 
 type HomeworkInfo struct {
-	HomeworkTitle  string `json:"homework_title"`
-	HomeworkType   int    `json:"homework_type"`
-	HomeworkAnswer string `json:"homework_answer"`
-	HomeworkScore  int    `json:"homework_score"`
+	HomeworkTitle  string `json:"homework_title" bson:"homework_title"`
+	HomeworkType   int    `json:"homework_type" bson:"homework_type"`
+	HomeworkAnswer string `json:"homework_answer" bson:"homework_answer"`
+	HomeworkScore  int    `json:"homework_score" bson:"homework_score"`
 }
