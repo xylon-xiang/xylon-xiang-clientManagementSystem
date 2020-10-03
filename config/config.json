@@ -1,0 +1,29 @@
+{
+  "database_config": {
+    "mongo_config": {
+      "db_address": "mongodb://@localhost:27017",
+      "db_name": "clientMngSys",
+      "time_out": 5,
+      "class_collection": "classInfo",
+      "student_collection": "studentInfo"
+    }
+  },
+
+  "api_config": {
+
+    "teacher_host": "localhost:1234",
+
+    "student_log_api": {
+      "method": "POST",
+      "url": "/student/:studentId",
+      "student_log_post_body": {
+        "student_password": "123456789"
+      }
+    },
+
+    "student_keep_alive_api": {
+      "method": "GET",
+      "url": "/student/:studentId/keepAlive"
+    }
+  }
+}
