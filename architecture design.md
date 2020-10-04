@@ -14,6 +14,52 @@
 
 ### 层次一
 
+* 时序图
+
+```mermaid
+sequenceDiagram
+
+    participant student
+    participant teacher
+    participant DataBase
+	
+
+    student ->> teacher: Http POST: Login
+  
+  teacher ->> DataBase: check password
+    DataBase ->> teacher: isPasswordRight
+    
+    
+    rect rgb(175, 255, 212)
+     
+    opt Wrong Password
+  	teacher -->> student: return Author Failure
+    student -->> teacher: Http POST: Login
+    teacher -->> DataBase: check password
+    DataBase -->> teacher: isPasswordRight
+    end
+    
+    end
+    
+    Note left of DataBase: PasswordRight
+    
+    teacher ->> DataBase: setSignInDate
+    
+    teacher ->> student: return Author Success
+    
+    teacher -> student: start a Websocket
+    
+  
+    activate student
+    activate teacher
+    student -> teacher: close Websocket
+    deactivate teacher
+    deactivate student
+
+    
+```
+
+
 * 学生：登录
 
   `POST			/student/{studentId}`
@@ -97,4 +143,8 @@
 * 更改签到状态
 
   `func  ChangeStudentSignStatus(studentId, className, classStartDate, targetSignStatus) (bool, error) {}`
+
+---------
+
+​    
 
