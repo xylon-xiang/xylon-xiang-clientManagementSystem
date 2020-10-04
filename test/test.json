@@ -1,0 +1,17 @@
+{
+  "class_name": "Software Engineering 1210",
+  "class_start_date": 1601790639,
+  "class_over_date": 1601794239,
+  "students_info": [
+    {
+      "student_id": "U0000",
+      "student_name": "Bob",
+      "student_password": "0000"
+    },
+    {
+      "student_id": "U1111",
+      "student_name": "Tom",
+      "student_password": "1111"
+    }
+  ]
+}
