@@ -1,6 +1,11 @@
 package util
 
-import "github.com/gorilla/websocket"
+import (
+	"clientManagementSystem/config"
+	"github.com/gorilla/websocket"
+	log2 "log"
+	"time"
+)
 
 type Connection struct {
 	IpAddress string
@@ -31,6 +36,7 @@ func (h *Hub) Run() {
 		select {
 		case client := <-h.Register:
 			h.Client[client] = true
+			log2.Printf("WebSocket Register: ip: %v\n", client.IpAddress)
 
 		case client := <-h.Unregister:
 			if _, ok := h.Client[client]; ok {
@@ -42,6 +48,35 @@ func (h *Hub) Run() {
 			for client := range h.Client {
 				_ = client.Conn.WriteMessage(websocket.TextMessage, message)
 			}
+		}
+	}
+}
+
+
+// FIXME: the close function contains some bugs
+// TODO: when close the websocket connection, set the logout time
+func (h *Hub) ClearWebConnection() {
+	for true {
+		for client := range h.Client{
+			messageType, msg, err := client.Conn.ReadMessage()
+			if err == websocket.ErrCloseSent{
+
+				if messageType == websocket.CloseMessage{
+					log2.Printf("closeWebsocket: %v\n", msg)
+					h.Unregister <- client
+				}
+
+				time.Sleep(time.Duration(config.Config.APIConfig.WebsocketCloseDuration))
+
+				continue
+			}
+
+			if err != nil{
+				log2.Printf("ReadMessageError: %v\n", err)
+			}
+
+
+
 		}
 	}
 }

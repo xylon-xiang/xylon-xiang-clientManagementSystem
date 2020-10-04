@@ -23,11 +23,11 @@ type StudentInfo struct {
 //////////////////////////////////////
 
 // database saving format
+
+
 type StudentStatus struct {
 	// class info
-	ClassName      string `json:"class_name" bson:"class_name"`
-	ClassStartDate int64  `json:"class_start_date" bson:"class_start_date"`
-	ClassOverDate  int64  `json:"class_over_date" bson:"class_over_date"`
+	Class
 
 	// student info
 	StudentInfo
@@ -41,9 +41,16 @@ type StudentStatus struct {
 	HomeworksInfo []HomeworkInfo `json:"homeworks_info" bson:"homeworks_info"`
 }
 
+type Class struct {
+	ClassName      string `json:"class_name" bson:"class_name"`
+	ClassStartDate int64  `json:"class_start_date" bson:"class_start_date"`
+	ClassOverDate  int64  `json:"class_over_date" bson:"class_over_date"`
+}
+
 type HomeworkInfo struct {
 	HomeworkTitle  string `json:"homework_title" bson:"homework_title"`
 	HomeworkType   int    `json:"homework_type" bson:"homework_type"`
 	HomeworkAnswer string `json:"homework_answer" bson:"homework_answer"`
 	HomeworkScore  int    `json:"homework_score" bson:"homework_score"`
 }
+

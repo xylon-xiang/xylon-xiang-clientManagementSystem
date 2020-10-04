@@ -65,7 +65,7 @@ func Save(colName string, content interface{}) (err error) {
 		{
 			studentInfo := content.([]StudentInfo)
 			insertData := make([]interface{}, len(studentInfo))
-			for key, value := range insertData {
+			for key, value := range studentInfo {
 				insertData[key] = value
 			}
 			_, err = StudentCol.InsertMany(context.TODO(), insertData)
@@ -82,19 +82,20 @@ func Save(colName string, content interface{}) (err error) {
 
 func UpdateOne(colName string, content interface{}) (err error) {
 
-	opt := options.Update().SetUpsert(true)
+	//opt := options.Update().SetUpsert(true)
 
 	switch colName {
 	case STUDENTSTATUS:
 		{
 			studentStatus := content.(StudentStatus)
+
 			filter := bson.M{
-				"student_id":       studentStatus.StudentId,
-				"class_name":       studentStatus.ClassName,
-				"class_start_date": studentStatus.ClassStartDate,
+				"studentinfo.student_id":       studentStatus.StudentId,
+				"class.class_name":       studentStatus.ClassName,
+				"class.class_start_date": studentStatus.ClassStartDate,
 			}
 			update := bson.M{"$set": studentStatus}
-			_, err = StudentStatusCol.UpdateOne(context.TODO(), filter, update, opt)
+			_, err = StudentStatusCol.UpdateOne(context.TODO(), filter, update)
 
 		}
 		//
@@ -118,7 +119,7 @@ func UpdateOne(colName string, content interface{}) (err error) {
 // for example:
 //
 // filterMap:= map[string]string{
-//		"studentId" = "Uxx",
+//		"StudentId" = "Uxx",
 //		"ClassName" = "shixun",
 //		"ClassStartDate" = "555555",
 // }
@@ -133,9 +134,9 @@ func FindOne(colName string, filterMap map[string]string) (result interface{}, e
 			)
 			classStartDate, err = strconv.ParseInt(filterMap["ClassStartDate"], 10, 64)
 			filter := bson.M{
-				"student_id":       filterMap["StudentId"],
-				"class_name":       filterMap["ClassName"],
-				"class_start_date": classStartDate,
+				"studentinfo.student_id":       filterMap["StudentId"],
+				"class.class_name":       filterMap["ClassName"],
+				"class.class_start_date": classStartDate,
 			}
 
 			err = StudentStatusCol.FindOne(context.TODO(), filter).Decode(&results)
@@ -151,7 +152,7 @@ func FindOne(colName string, filterMap map[string]string) (result interface{}, e
 		{
 			var results StudentInfo
 			filter := bson.M{
-				"student_id": filterMap["StudentId"],
+				"studentinfo.student_id": filterMap["StudentId"],
 			}
 
 			err := StudentCol.FindOne(context.TODO(), filter).Decode(&results)
@@ -169,13 +170,14 @@ func FindOne(colName string, filterMap map[string]string) (result interface{}, e
 
 // colValue is just used for search the specific person's all tips, so the value is StudentId
 // the return interface should be just transform into [] StudentStatus or [] StudentInfo
-func FindAll(colName string, colValue string) (result interface{}, err error) {
+func FindAll(colName string, studentId string, className ...string) (result interface{}, err error) {
 
 	switch colName {
 	case STUDENTSTATUS:
 		{
 
-			cursor, err := StudentStatusCol.Find(context.TODO(), bson.M{"student_id": colValue})
+			cursor, err := StudentStatusCol.Find(context.TODO(),
+				bson.M{"studentinfo.student_id": studentId, "class.class_name": className[0]})
 			if err != nil {
 				return nil, err
 			}
