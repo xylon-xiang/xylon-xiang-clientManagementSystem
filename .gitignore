@@ -1,9 +1,2 @@
-/.idea/clientManagementSystem.iml
 /go.sum
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/vcs.xml
-/bk/
-/.idea/dataSources/3ff423c3-ee88-48f8-8d51-6bd43e4cf342.xml
-/.idea/dataSources.local.xml
-/.idea/dataSources.xml
+/.idea
