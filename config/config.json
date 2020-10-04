@@ -11,11 +11,15 @@
 
   "api_config": {
 
-    "teacher_host": "localhost:1234",
+    "teacher_host": "http://localhost:1234",
+
+    "websocket_port": ":14758",
+
+    "websocket_close_duration": 60,
 
     "student_log_api": {
       "method": "POST",
-      "url": "/student/:studentId",
+      "path": "/student/:studentId",
       "student_log_post_body": {
         "student_password": "123456789"
       }
@@ -23,7 +27,7 @@
 
     "student_keep_alive_api": {
       "method": "GET",
-      "url": "/student/:studentId/keepAlive"
+      "path": "/student/:studentId/keepAlive"
     }
   }
 }

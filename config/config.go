@@ -29,16 +29,18 @@ type MongoConfig struct {
 //   API interface    //
 
 type APIConfig struct {
-	TeacherHost         string              `json:"teacher_host"`
-	StudentLogAPI       StudentLogAPI       `json:"student_log_api"`
-	StudentKeepAliveAPI StudentKeepAliveAPI `json:"student_keep_alive_api"`
+	TeacherHost            string              `json:"teacher_host"`
+	WebsocketPort          string              `json:"websocket_port"`
+	WebsocketCloseDuration int64               `json:"websocket_close_duration"`
+	StudentLogAPI          StudentLogAPI       `json:"student_log_api"`
+	StudentKeepAliveAPI    StudentKeepAliveAPI `json:"student_keep_alive_api"`
 }
 
 // student log in api for check password
 
 type StudentLogAPI struct {
 	Method             string             `json:"method"`
-	URL                string             `json:"url"`
+	Path               string             `json:"path"`
 	StudentLogPostBody StudentLogPostBody `json:"student_log_post_body"`
 }
 
@@ -50,7 +52,7 @@ type StudentLogPostBody struct {
 
 type StudentKeepAliveAPI struct {
 	Method string `json:"method"`
-	URL    string `json:"url"`
+	URL    string `json:"path"`
 }
 
 var Config ConfigObj
