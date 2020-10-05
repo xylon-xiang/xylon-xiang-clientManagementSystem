@@ -1,7 +1,8 @@
 package object_operation
 
 import (
-	"clientManagementSystem/teacher-side/module"
+	"clientManagementSystem/module"
+	"clientManagementSystem/teacher-side/util"
 	"strconv"
 )
 
@@ -16,7 +17,7 @@ func ChangeSignStatus(studentId string, className string,
 		"ClassStartDate": startTime,
 	}
 
-	result, err := module.FindOne(module.STUDENTSTATUS, filter)
+	result, err := util.FindOne(util.STUDENTSTATUS, filter)
 	if err != nil{
 		return false, err
 	}
@@ -24,7 +25,7 @@ func ChangeSignStatus(studentId string, className string,
 	studentStatus := result.(module.StudentStatus)
 	studentStatus.SignStatus = targetSignStatus
 
-	err = module.UpdateOne(module.STUDENTSTATUS, studentStatus)
+	err = util.UpdateOne(util.STUDENTSTATUS, studentStatus)
 	if err != nil{
 		return false, err
 	}

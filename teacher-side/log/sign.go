@@ -2,8 +2,8 @@ package log
 
 import (
 	"clientManagementSystem/config"
+	"clientManagementSystem/module"
 	"clientManagementSystem/teacher-side/constant"
-	"clientManagementSystem/teacher-side/module"
 	"clientManagementSystem/teacher-side/util"
 	"github.com/gorilla/websocket"
 	url2 "net/url"
@@ -53,7 +53,7 @@ func SetSignTime(signStatus string, studentStatus module.StudentStatus) error {
 		"ClassStartDate": startDate,
 	}
 
-	result, err := module.FindOne(module.STUDENTSTATUS, filter)
+	result, err := util.FindOne(util.STUDENTSTATUS, filter)
 	if err != nil{
 		return err
 	}
@@ -69,7 +69,7 @@ func SetSignTime(signStatus string, studentStatus module.StudentStatus) error {
 	}
 
 
-	err = module.UpdateOne(module.STUDENTSTATUS, newStudentStatus)
+	err = util.UpdateOne(util.STUDENTSTATUS, newStudentStatus)
 	if err != nil{
 		return err
 	}

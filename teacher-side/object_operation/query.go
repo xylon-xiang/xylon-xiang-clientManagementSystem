@@ -1,7 +1,8 @@
 package object_operation
 
 import (
-	"clientManagementSystem/teacher-side/module"
+	"clientManagementSystem/module"
+	"clientManagementSystem/teacher-side/util"
 	"encoding/json"
 )
 
@@ -20,7 +21,7 @@ type EachClassStatus struct {
 
 func QueryStudentStatus(studentId string, className string) ([]module.StudentStatus, error) {
 
-	results, err := module.FindAll(module.STUDENTSTATUS, studentId, className)
+	results, err := util.FindAll(util.STUDENTSTATUS, studentId, className)
 	if err != nil {
 		return nil, err
 	}

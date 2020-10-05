@@ -3,33 +3,29 @@ package log
 import (
 	"bytes"
 	"clientManagementSystem/config"
-	"clientManagementSystem/student-side/module"
+	"clientManagementSystem/module"
+	"clientManagementSystem/student-side/util"
 	"clientManagementSystem/teacher-side/constant"
 	"encoding/json"
 	"github.com/gorilla/websocket"
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"regexp"
 )
 
-func SendLoginHttp(studentId string, studentPassword string) (bool, error) {
-
-	re := regexp.MustCompile(`/:.*[/]?`)
+func SendLoginHttp(studentId string, studentLogPost module.StudentLogPost) (bool, error) {
 
 	hostUrl := config.Config.APIConfig.TeacherHost +
 		config.Config.APIConfig.StudentLogAPI.Path
-	urlStr := re.ReplaceAll([]byte(hostUrl),
-		[]byte("/"+studentId))
+
+	urlStr := util.GetRealUrl(hostUrl, studentId)
 
 	logUrl, err := url.Parse(string(urlStr))
 	if err != nil {
 		return false, err
 	}
 
-	postBody := module.StudentLogPost{
-		StudentPassword: studentPassword,
-	}
+	postBody := studentLogPost
 
 	requestBody, err := json.Marshal(postBody)
 	if err != nil {

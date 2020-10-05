@@ -4,5 +4,5 @@ const (
 	LOGIN = "login"
 	LOGOUT = "logout"
 
-
+	QUIZ = "Quiz"
 )

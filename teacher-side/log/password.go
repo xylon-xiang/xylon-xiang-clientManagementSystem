@@ -1,6 +1,9 @@
 package log
 
-import "clientManagementSystem/teacher-side/module"
+import (
+	"clientManagementSystem/module"
+	"clientManagementSystem/teacher-side/util"
+)
 
 func CheckPassword(studentId string, studentPassword string) (isPasswordRight bool, err error) {
 
@@ -8,7 +11,7 @@ func CheckPassword(studentId string, studentPassword string) (isPasswordRight bo
 		"StudentId": studentId,
 	}
 
-	results, err := module.FindOne(module.STUDENTINFO, filter)
+	results, err := util.FindOne(util.STUDENTINFO, filter)
 	if err != nil{
 		return false, err
 	}
