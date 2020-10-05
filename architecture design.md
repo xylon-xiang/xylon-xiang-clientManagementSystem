@@ -52,6 +52,11 @@ sequenceDiagram
   
     activate student
     activate teacher
+    
+    rect rgb(255,255,0)
+     student --> teacher: some infomation exchange
+     end
+     
     student -> teacher: close Websocket
     deactivate teacher
     deactivate student
@@ -146,5 +151,67 @@ sequenceDiagram
 
 ---------
 
-​    
+### 层次二
+
+
+
+```mermaid
+sequenceDiagram
+
+participant student
+participant teacher
+
+rect rgb(12,255,255)
+student -> teacher: EXIST Websocket 
+end
+
+student ->> teacher: Http POST
+note left of student: POST body contains these infos: <br> · StudentInfo <br> · ClassInfo<br>· SeatInfo <br>· Question
+teacher ->> student: Http return OK(200)
+teacher -->> student: Websocket writeMsg: <br> Questions' Answer
+```
+
+`POST		/student/{studentId}`
+
+
+
+### 层次三
+
+New a tables named "`questionInfo`" containing the whole questions infos
+
+```mermaid
+sequenceDiagram
+
+participant student
+participant teacher
+participant database
+
+rect rgb(75,255,255)
+student -> teacher: EXIST Websocket 
+end
+
+teacher ->> teacher: publish questions
+teacher ->> database: Save homeworkInfo
+
+note right of database: Questions should <br> contains a DDL
+
+rect rgb(101, 102, 485)
+teacher ->> student: Websocket <br> Broadcase Questions
+end
+
+
+note left of student: answer the questions
+
+student ->> teacher: Http POST 
+note left of student: POST body contains these infos: <br> ·HomeworkInfo <br>·StudentInfo <br> ·ClassInfo <br> all of this infos is in an Array
+
+teacher ->> teacher: Auto Correct homework
+
+teacher ->> database: Save homeworkStatus
+teacher ->> student: Http return OK(200)
+
+opt text/file questions
+	teacher -->> teacher: corrent it at anytime
+end
+```
 
