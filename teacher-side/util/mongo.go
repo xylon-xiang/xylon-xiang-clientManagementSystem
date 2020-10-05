@@ -15,11 +15,13 @@ import (
 var (
 	StudentStatusCol *mongo.Collection
 	StudentCol       *mongo.Collection
+	HomeworkInfoCol  *mongo.Collection
 )
 
 const (
 	STUDENTSTATUS = "studentStatus"
 	STUDENTINFO   = "studentInfo"
+	HOMEWORKINFO  = "homeworkInfo"
 )
 
 // connect to db and initialize the collection
@@ -45,6 +47,8 @@ func init() {
 		Collection(config.Config.DatabaseConfig.MongoConfig.ClassCollection)
 	StudentCol = clientManagementSysDB.
 		Collection(config.Config.DatabaseConfig.MongoConfig.StudentCollection)
+	HomeworkInfoCol = clientManagementSysDB.
+		Collection(config.Config.DatabaseConfig.MongoConfig.HomeworkInfoCollection)
 
 }
 
@@ -72,6 +76,18 @@ func Save(colName string, content interface{}) (err error) {
 			_, err = StudentCol.InsertMany(context.TODO(), insertData)
 		}
 
+	case HOMEWORKINFO:
+		{
+			homeworkInfo := content.([]module.HomeworkInfo)
+			insertData := make([]interface{}, len(homeworkInfo))
+			for key, value := range homeworkInfo {
+				insertData[key] = value
+			}
+
+			_, err = HomeworkInfoCol.InsertMany(context.TODO(), insertData)
+
+		}
+
 	}
 
 	if err != nil {
@@ -91,7 +107,7 @@ func UpdateOne(colName string, content interface{}) (err error) {
 			studentStatus := content.(module.StudentStatus)
 
 			filter := bson.M{
-				"studentinfo.student_id":       studentStatus.StudentId,
+				"studentinfo.student_id": studentStatus.StudentId,
 				"class.class_name":       studentStatus.ClassName,
 				"class.class_start_date": studentStatus.ClassStartDate,
 			}
@@ -124,6 +140,8 @@ func UpdateOne(colName string, content interface{}) (err error) {
 //		"ClassName" = "shixun",
 //		"ClassStartDate" = "555555",
 // }
+//
+// in Case of homeworkInfo, the filterMap should contains such a key: "HomeworkName"
 func FindOne(colName string, filterMap map[string]string) (result interface{}, err error) {
 
 	switch colName {
@@ -135,7 +153,7 @@ func FindOne(colName string, filterMap map[string]string) (result interface{}, e
 			)
 			classStartDate, err = strconv.ParseInt(filterMap["ClassStartDate"], 10, 64)
 			filter := bson.M{
-				"studentinfo.student_id":       filterMap["StudentId"],
+				"studentinfo.student_id": filterMap["StudentId"],
 				"class.class_name":       filterMap["ClassName"],
 				"class.class_start_date": classStartDate,
 			}
@@ -162,6 +180,21 @@ func FindOne(colName string, filterMap map[string]string) (result interface{}, e
 			}
 
 			return results, nil
+		}
+
+	case HOMEWORKINFO:
+		{
+			var result module.HomeworkInfo
+			filter := bson.M{
+				"homework_name": filterMap["HomeworkName"],
+			}
+
+			err := HomeworkInfoCol.FindOne(context.TODO(), filter).Decode(result)
+			if err != nil{
+				return nil, err
+			}
+
+			return result, nil
 		}
 
 	}
@@ -204,7 +237,22 @@ func FindAll(colName string, studentId string, className ...string) (result inte
 		}
 
 		return results, nil
+
+	case HOMEWORKINFO:
+
+		cursor, err := HomeworkInfoCol.Find(context.TODO(), bson.M{})
+		if err != nil{
+			return nil, err
+		}
+
+		var results []module.HomeworkInfo
+		if err = cursor.All(context.TODO(), &result); err != nil{
+			return nil, err
+		}
+
+		return results, nil
 	}
+
 
 	return nil, nil
 }

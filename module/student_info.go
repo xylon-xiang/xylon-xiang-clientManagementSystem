@@ -24,7 +24,6 @@ type StudentInfo struct {
 
 // database saving format
 
-
 type StudentStatus struct {
 	// class info
 	Class
@@ -52,5 +51,5 @@ type HomeworkInfo struct {
 	HomeworkType   int    `json:"homework_type" bson:"homework_type"`
 	HomeworkAnswer string `json:"homework_answer" bson:"homework_answer"`
 	HomeworkScore  int    `json:"homework_score" bson:"homework_score"`
+	HomeworkDDL    int64  `json:"homework_ddl" bson:"homework_ddl"`
 }
-

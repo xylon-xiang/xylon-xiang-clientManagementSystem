@@ -37,4 +37,11 @@ const (
 	GETATTENDANCERATE  = "getAttendanceRate"
 	GETHOMEWORKSTATUS  = "getHomeworkStatus"
 	GETCUMULATIVESCORE = "getCumulativeScore"
+
+	ASSIGNMENT = "assignment"
+)
+
+const (
+	HOMEWORKSCOREMAX = 1
+	HOMEWORKSCOREZERO = 0
 )

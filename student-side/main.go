@@ -62,6 +62,7 @@ func main() {
 
 func LogController(studentId string, studentPassword string) {
 
+	// FIXME: the class info should be ensured by program
 	studentLogPost := module.StudentLogPost{
 		StudentPassword: studentPassword,
 		ClassName: "Software Engineering 1210",
