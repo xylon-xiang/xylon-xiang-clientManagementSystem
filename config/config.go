@@ -33,7 +33,7 @@ type APIConfig struct {
 	WebsocketPort          string              `json:"websocket_port"`
 	WebsocketCloseDuration int64               `json:"websocket_close_duration"`
 	StudentLogAPI          StudentLogAPI       `json:"student_log_api"`
-	StudentKeepAliveAPI    StudentKeepAliveAPI `json:"student_keep_alive_api"`
+	StudentHandUpAPI StudentHandUpAPI `json:"student_hand_up_api"`
 }
 
 // student log in api for check password
@@ -41,19 +41,16 @@ type APIConfig struct {
 type StudentLogAPI struct {
 	Method             string             `json:"method"`
 	Path               string             `json:"path"`
-	StudentLogPostBody StudentLogPostBody `json:"student_log_post_body"`
 }
 
-type StudentLogPostBody struct {
-	StudentPassword string `json:"student_password"`
+
+type StudentHandUpAPI struct {
+	Method string	`json:"method"`
+	Path string `json:"path"`
 }
 
-// start a connection through websocket
 
-type StudentKeepAliveAPI struct {
-	Method string `json:"method"`
-	URL    string `json:"path"`
-}
+
 
 var Config ConfigObj
 
