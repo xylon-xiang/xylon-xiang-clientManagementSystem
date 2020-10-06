@@ -43,6 +43,8 @@ const (
 	PUBLISHHOMEWORK = "publishHomework"
 
 	CHANGESTUDENTHOMEWORKSCORE = "changeStudentHomeworkScore"
+
+	SCREENSHOT = "screenshot"
 )
 
 const (

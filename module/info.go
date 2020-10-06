@@ -36,6 +36,9 @@ type StudentStatus struct {
 	SignOutDate int64 `json:"sign_out_date" bson:"sign_out_date"`
 	SignStatus  int   `json:"sign_status" bson:"sign_status"`
 
+	// screen frozen info, unit is minute
+	ScreenFrozenDuration int `json:"screen_frozen_duration" bson:"screen_frozen_duration"`
+
 	// homework info
 	HomeworksInfo []HomeworkInfo `json:"homeworks_info" bson:"homeworks_info"`
 }

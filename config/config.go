@@ -37,6 +37,7 @@ type APIConfig struct {
 	StudentLogAPI          StudentLogAPI    `json:"student_log_api"`
 	StudentHandUpAPI       StudentHandUpAPI `json:"student_hand_up_api"`
 	HomeworkAPI            HomeworkAPI      `json:"homework_api"`
+	ScreenshotAPI          ScreenshotAPI    `json:"screenshot_api"`
 }
 
 // student log in api for check password
@@ -52,9 +53,15 @@ type StudentHandUpAPI struct {
 }
 
 type HomeworkAPI struct {
-	Method string `json:"method"`
-	Path   string `json:"path"`
+	Method       string `json:"method"`
+	Path         string `json:"path"`
 	FileSavePath string `json:"file_save_path"`
+}
+
+type ScreenshotAPI struct {
+	Method                   string `json:"method"`
+	Path                     string `json:"path"`
+	UpdateFrozenDurationPath string `json:"update_frozen_duration_path"`
 }
 
 var Config ConfigObj

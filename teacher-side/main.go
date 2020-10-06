@@ -7,6 +7,7 @@ import (
 	"clientManagementSystem/teacher-side/log"
 	"clientManagementSystem/teacher-side/object_operation"
 	"clientManagementSystem/teacher-side/q_a"
+	"clientManagementSystem/teacher-side/screenshot"
 	"clientManagementSystem/teacher-side/util"
 	"fmt"
 	"github.com/labstack/echo"
@@ -42,6 +43,9 @@ func main() {
 	// section 3, Q&A homework function
 	e.POST(config.Config.APIConfig.HomeworkAPI.Path, HomeworkController)
 	e.POST(config.Config.APIConfig.HomeworkAPI.FileSavePath, HomeworkFileSaveController)
+
+	e.POST(config.Config.APIConfig.ScreenshotAPI.Path, ScreenshotController)
+	e.PUT(config.Config.APIConfig.ScreenshotAPI.UpdateFrozenDurationPath, ScreenFrozenController)
 
 	e.Logger.Fatal(e.Start(":1234"))
 
@@ -155,6 +159,9 @@ func handleInput() {
 
 		case constant.CHANGESTUDENTHOMEWORKSCORE:
 			ChangeStudentHomeworkScoreController()
+
+		case constant.SCREENSHOT:
+			SendScreenRequestController()
 
 		case constant.GETHOMEWORKSTATUS:
 			//object_operation.QueryHomeworkStatus(db.StudentStatus{})
@@ -293,4 +300,65 @@ func ChangeStudentHomeworkScoreController() {
 
 	log2.Println("change student homework status success!")
 	return
+}
+
+func SendScreenRequestController() {
+
+	success, err := object_operation.SendScreenshotWsRequest(Hub, "Bob")
+	if err != nil{
+		log2.Printf("send screenshot websocket request error: %v\n", err)
+		return
+	}
+
+	if !success{
+		log2.Printf("this student is absent\n")
+		return
+	}
+
+	log2.Printf("see this student's desktop OK \n")
+	return
+
+}
+
+func ScreenshotController(context echo.Context) error {
+
+	startDate, err := strconv.ParseInt(context.FormValue("classStartDate"), 10, 64)
+	if err != nil{
+		return err
+	}
+
+	studentStatus := module.StudentStatus{
+		StudentInfo: module.StudentInfo{
+			StudentId: context.FormValue("studentId"),
+		},
+		Class: module.Class{
+			ClassName: context.FormValue("className"),
+			ClassStartDate: startDate,
+		},
+	}
+
+	pic, err := context.FormFile("screenshot")
+	if err != nil{
+		return err
+	}
+
+	// save the screenshot at path "/screenshot"
+	err = screenshot.SaveScreenshot(studentStatus.StudentName, pic)
+	if err != nil{
+		return err
+	}
+
+	return context.NoContent(http.StatusOK)
+}
+
+func ScreenFrozenController(context echo.Context) error {
+
+	studentStatus := new(module.StudentStatus)
+	if err := context.Bind(studentStatus); err != nil{
+		return err
+	}
+
+
+
+
 }

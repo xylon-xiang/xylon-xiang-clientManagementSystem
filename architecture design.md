@@ -43,7 +43,7 @@ sequenceDiagram
     
     Note left of DataBase: PasswordRight
     
-    teacher ->> DataBase: setSignInDate
+    teacher ->> database: setSignInDate
     
     teacher ->> student: return Author Success
     
@@ -177,7 +177,10 @@ teacher -->> student: Websocket writeMsg: <br> Questions' Answer
 
 ### 层次三
 
-New a tables named "`questionInfo`" containing the whole questions infos
+New a tables named "`questionInfo`" containing the whole questions infos.
+
+When a student want to upload a file, the requst API is different with the normal homework upload API. 
+And also, he can just upload a file once. Therefore, when many files shuold be uploaded, he should request the "file upload API" for many times which contains the params named "studentId", "className", "classStartDate", "questionTitle" and   "file"
 
 ```mermaid
 sequenceDiagram
@@ -215,6 +218,48 @@ opt text/file questions
 end
 ```
 
-When a student want to upload a file, the requst API is different with the normal homework upload API. 
-And also, he can just upload a file once. Therefore, when many files shuold be uploaded, he should request the "file upload API" for many times which contains the params named "studentId", "className", "classStartDate", "questionTitle" and   "file"
+### 层次四
+
+```mermaid
+sequenceDiagram
+
+participant student
+participant teacher
+participant database
+
+rect rgb(75,255,255)
+student -> teacher: EXIST Websocket 
+end
+
+
+rect rgb(255,124,124)
+teacher ->> student: Websocket <br> msg: "screenshot"
+
+student ->> teacher: Http POST
+
+teacher ->> student: Http return OK(200)
+end
+
+note left of student: POST body contains these infos: <br> a picture
+
+loop Every 5 minutes 
+student ->> student: listen screen img change
+end
+
+alt just little change
+
+student ->> teacher: Http PUT
+teacher ->> database: update screen <br> frozen duration
+teacher ->> student: Http return OK(200)
+
+end
+
+
+
+
+
+
+```
+
+
 

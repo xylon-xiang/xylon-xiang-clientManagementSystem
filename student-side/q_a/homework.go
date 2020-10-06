@@ -56,9 +56,6 @@ func UploadHomework(status module.StudentStatus) (string, error) {
 	}
 
 	return string(body), nil
-
-
-
-
-
 }
+
+// TODO: send the file to homework file receive API
