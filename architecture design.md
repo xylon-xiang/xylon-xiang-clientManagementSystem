@@ -215,3 +215,6 @@ opt text/file questions
 end
 ```
 
+When a student want to upload a file, the requst API is different with the normal homework upload API. 
+And also, he can just upload a file once. Therefore, when many files shuold be uploaded, he should request the "file upload API" for many times which contains the params named "studentId", "className", "classStartDate", "questionTitle" and   "file"
+

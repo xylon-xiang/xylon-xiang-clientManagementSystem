@@ -46,6 +46,7 @@ type Class struct {
 	ClassOverDate  int64  `json:"class_over_date" bson:"class_over_date"`
 }
 
+// if type is file, then answer will be the file path
 type HomeworkInfo struct {
 	HomeworkTitle  string `json:"homework_title" bson:"homework_title"`
 	HomeworkType   int    `json:"homework_type" bson:"homework_type"`
