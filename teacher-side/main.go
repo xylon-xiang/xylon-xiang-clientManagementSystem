@@ -6,6 +6,7 @@ import (
 	"clientManagementSystem/teacher-side/constant"
 	"clientManagementSystem/teacher-side/log"
 	"clientManagementSystem/teacher-side/object_operation"
+	"clientManagementSystem/teacher-side/q_a"
 	"clientManagementSystem/teacher-side/util"
 	"fmt"
 	"github.com/labstack/echo"
@@ -32,9 +33,15 @@ func main() {
 
 	e := echo.New()
 
+	// section 1
 	e.POST(config.Config.APIConfig.StudentLogAPI.Path, LoginController)
 
+	// section 2
 	e.POST(config.Config.APIConfig.StudentHandUpAPI.Path, QuizController)
+
+	// section 3, Q&A homework function
+	e.POST(config.Config.APIConfig.HomeworkAPI.Path, HomeworkController)
+	e.POST(config.Config.APIConfig.HomeworkAPI.FileSavePath, HomeworkFileSaveController)
 
 	e.Logger.Fatal(e.Start(":1234"))
 
@@ -132,6 +139,23 @@ func handleInput() {
 			}
 			fmt.Println(string(byteStream))
 
+		case constant.PUBLISHHOMEWORK:
+			homeworkInfo, err := object_operation.GetHomeworkInfoTest()
+			if err != nil {
+				log2.Printf("get homework info err: %v\n", err)
+				continue
+			}
+
+			success, err := object_operation.PublishHomeworkInfo(Hub, homeworkInfo)
+			if err != nil || !success {
+				log2.Printf("publish homework info err: %v\n", err)
+				continue
+			}
+			log2.Printf("publish homework success!\n")
+
+		case constant.CHANGESTUDENTHOMEWORKSCORE:
+			ChangeStudentHomeworkScoreController()
+
 		case constant.GETHOMEWORKSTATUS:
 			//object_operation.QueryHomeworkStatus(db.StudentStatus{})
 		}
@@ -155,7 +179,7 @@ func LoginController(context echo.Context) error {
 	if isMatch {
 		host := context.Request().RemoteAddr
 
-		err = log.NewWebsocket(Hub, host)
+		err = log.NewWebsocket(Hub, host, studentStatus.StudentName)
 		if err != nil {
 			return err
 		}
@@ -164,7 +188,6 @@ func LoginController(context echo.Context) error {
 		if err != nil {
 			return err
 		}
-
 
 		return context.String(http.StatusOK, constant.ACCEPT)
 
@@ -177,7 +200,7 @@ func LoginController(context echo.Context) error {
 func QuizController(context echo.Context) error {
 
 	quizBody := new(module.QuizPostBody)
-	if err := context.Bind(quizBody); err != nil{
+	if err := context.Bind(quizBody); err != nil {
 		return err
 	}
 
@@ -196,7 +219,7 @@ func AssignmentController() {
 	// TODO: this part of code should be transport as teachers' inputting
 	question := module.HomeworkInfo{
 		HomeworkTitle: "Question 1: how old are you?",
-		HomeworkType: constant.TEXT,
+		HomeworkType:  constant.TEXT,
 	}
 
 	questionStr := fmt.Sprintf("%v", question)
@@ -204,4 +227,70 @@ func AssignmentController() {
 
 	Hub.Broadcast <- byteStream
 
+}
+
+func HomeworkController(context echo.Context) error {
+
+	studentStatus := new(module.StudentStatus)
+	if err := context.Bind(studentStatus); err != nil{
+		return err
+	}
+
+	if err := q_a.AutoCorrectHomeWork(&((*studentStatus).HomeworksInfo)); err != nil{
+		return err
+	}
+
+	if err := q_a.UpdateStudentHomeworkStatus(*studentStatus); err != nil{
+		return err
+	}
+
+	return context.String(http.StatusOK, "")
+}
+
+func HomeworkFileSaveController(context echo.Context) error {
+
+	startDate, err := strconv.ParseInt(context.FormValue("classStartDate"), 10, 64)
+	if err != nil{
+		return err
+	}
+
+	studentStatus := module.StudentStatus{
+		StudentInfo: module.StudentInfo{
+			StudentId: context.FormValue("studentId"),
+		},
+		Class: module.Class{
+			ClassName: context.FormValue("className"),
+			ClassStartDate: startDate,
+		},
+	}
+
+	questionTitle := context.FormValue("questionTitle")
+	file, err := context.FormFile("file")
+	if err != nil{
+		return err
+	}
+
+	// save student upload file in local
+	err = q_a.SaveFileQuestionAsFile(studentStatus, questionTitle, file)
+	if err != nil{
+		return err
+	}
+
+	return context.String(http.StatusOK, "upload success")
+}
+
+func ChangeStudentHomeworkScoreController() {
+
+	status := module.StudentStatus{
+
+	}
+
+	err := object_operation.ChangeHomeworkStatus(status)
+	if err != nil{
+		log2.Printf("change homework status error: %v\n", err)
+		return
+	}
+
+	log2.Println("change student homework status success!")
+	return
 }

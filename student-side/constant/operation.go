@@ -5,4 +5,6 @@ const (
 	LOGOUT = "logout"
 
 	QUIZ = "Quiz"
+
+	UPLOADHOMEWORK = "uploadHomework"
 )

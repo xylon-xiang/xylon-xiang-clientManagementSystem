@@ -5,6 +5,7 @@ import (
 	"clientManagementSystem/module"
 	"clientManagementSystem/student-side/constant"
 	"clientManagementSystem/student-side/log"
+	"clientManagementSystem/student-side/q_a"
 	"clientManagementSystem/student-side/quiz"
 	"flag"
 	"fmt"
@@ -52,6 +53,9 @@ func main() {
 			_, _ = fmt.Scanln(&QuestionContent)
 			QuizController(studentId, studentName, QuestionContent)
 
+		case constant.UPLOADHOMEWORK:
+			UploadHomeworkController()
+
 		case constant.LOGOUT:
 			go closeWebsocket(websocketConnection)
 		}
@@ -95,6 +99,24 @@ func QuizController(studentId string, studentName string, question string) {
 
 	log2.Printf("answer is: \n%v", answer)
 	return
+}
+
+func UploadHomeworkController() {
+
+	status, err := q_a.GetStudentStatus()
+	if err != nil{
+		log2.Printf("get student status err: %v\n", err)
+		return
+	}
+
+	response, err := q_a.UploadHomework(*status)
+	if err != nil{
+		log2.Printf("upload homework err: %v\n", err)
+		return
+	}
+
+	log2.Println(response)
+
 }
 
 func startWebsocketListening() {

@@ -9,6 +9,7 @@ import (
 
 type Connection struct {
 	IpAddress string
+	StudentName string
 	Conn *websocket.Conn
 }
 

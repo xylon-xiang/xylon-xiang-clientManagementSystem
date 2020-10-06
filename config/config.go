@@ -33,8 +33,10 @@ type APIConfig struct {
 	TeacherHost            string           `json:"teacher_host"`
 	WebsocketPort          string           `json:"websocket_port"`
 	WebsocketCloseDuration int64            `json:"websocket_close_duration"`
+	HomeworkFileFolderPath string           `json:"homework_file_folder_path"`
 	StudentLogAPI          StudentLogAPI    `json:"student_log_api"`
 	StudentHandUpAPI       StudentHandUpAPI `json:"student_hand_up_api"`
+	HomeworkAPI            HomeworkAPI      `json:"homework_api"`
 }
 
 // student log in api for check password
@@ -47,6 +49,12 @@ type StudentLogAPI struct {
 type StudentHandUpAPI struct {
 	Method string `json:"method"`
 	Path   string `json:"path"`
+}
+
+type HomeworkAPI struct {
+	Method string `json:"method"`
+	Path   string `json:"path"`
+	FileSavePath string `json:"file_save_path"`
 }
 
 var Config ConfigObj

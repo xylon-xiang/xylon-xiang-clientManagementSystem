@@ -246,7 +246,7 @@ func FindAll(colName string, studentId string, className ...string) (result inte
 		}
 
 		var results []module.HomeworkInfo
-		if err = cursor.All(context.TODO(), &result); err != nil{
+		if err = cursor.All(context.TODO(), &results); err != nil{
 			return nil, err
 		}
 

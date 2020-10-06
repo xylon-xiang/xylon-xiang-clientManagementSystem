@@ -2,30 +2,29 @@ package object_operation
 
 import (
 	"clientManagementSystem/module"
-	"clientManagementSystem/teacher-side/constant"
 	"clientManagementSystem/teacher-side/util"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
-	"time"
+	"strconv"
 )
 
-func getHomeworkInfoTest() ([]module.HomeworkInfo, error) {
+func GetHomeworkInfoTest() ([]module.HomeworkInfo, error) {
 
 	file, err := os.Open("test/homeworkTest.json")
-	if err!= nil{
+	if err != nil {
 		return nil, err
 	}
 
 	bytesStream, err := ioutil.ReadAll(file)
-	if err != nil{
+	if err != nil {
 		return nil, err
 	}
 
 	var homeworkInfo []module.HomeworkInfo
 	err = json.Unmarshal(bytesStream, &homeworkInfo)
-	if err != nil{
+	if err != nil {
 		return nil, err
 	}
 
@@ -36,18 +35,20 @@ func getHomeworkInfoTest() ([]module.HomeworkInfo, error) {
 // the input homework info is the standard homework info, which means it contains the standard answer
 func PublishHomeworkInfo(hub *util.Hub, homeworkInfo []module.HomeworkInfo) (success bool, err error) {
 
-	// remove the standard answer
-	for _, value := range homeworkInfo{
-		value.HomeworkAnswer = ""
-		value.HomeworkScore = 0
-	}
-
-	homeworkStr := fmt.Sprintf("%v", homeworkInfo)
 
 	err = util.Save(util.HOMEWORKINFO, homeworkInfo)
-	if err != nil{
+	if err != nil {
 		return false, err
 	}
+
+	// remove the standard answer
+	for key, _ := range homeworkInfo {
+		homeworkInfo[key].HomeworkAnswer = ""
+		homeworkInfo[key].HomeworkScore = 0
+	}
+
+
+	homeworkStr := fmt.Sprintf("%v", homeworkInfo)
 
 	// broadcast the homework info
 	hub.Broadcast <- []byte(homeworkStr)
@@ -56,58 +57,33 @@ func PublishHomeworkInfo(hub *util.Hub, homeworkInfo []module.HomeworkInfo) (suc
 
 }
 
-// correct homework by exact match the int or string
-// pass the homework whose type is text/file
-func AutoCorrectHomeWork(homeworkInfo *[]module.HomeworkInfo) error {
+// this function is used after teacher correct some questions and give his subject points
+func ChangeHomeworkStatus(studentStatus module.StudentStatus) error {
 
-	results, err := util.FindAll(util.HOMEWORKINFO, "")
+	startDate := strconv.FormatInt(studentStatus.ClassStartDate, 10)
+	filter := map[string]string{
+		"StudentId": studentStatus.StudentId,
+		"ClassName": studentStatus.ClassName,
+		"ClassStartDate": startDate,
+	}
+
+	result, err := util.FindOne(util.STUDENTSTATUS, filter)
 	if err != nil{
 		return err
 	}
 
-	standardHomeworkInfo := results.([]module.HomeworkInfo)
+	status := result.(module.StudentStatus)
 
-	// auto correct the homework whose type is select or fill blank
-	for _, answer := range standardHomeworkInfo{
+	for key, _ := range status.HomeworksInfo{
 
-		for _, homework := range *homeworkInfo{
+		for _, homework := range studentStatus.HomeworksInfo{
 
-			// if over ddl, then , no score
-			if time.Now().Unix() > answer.HomeworkDDL {
-				homework.HomeworkScore = constant.HOMEWORKSCOREZERO
-				continue
-			}
-
-			// if it is the homework type is text/file, pass it
-			if homework.HomeworkType == constant.TEXT ||
-				homework.HomeworkType == constant.FILE{
-				continue
-			}
-
-			// if all matched, then they are the same questions
-			if answer.HomeworkType == homework.HomeworkType &&
-				answer.HomeworkTitle == homework.HomeworkTitle{
-
-				// auto correct it
-				if answer.HomeworkAnswer == homework.HomeworkAnswer{
-					homework.HomeworkScore = constant.HOMEWORKSCOREMAX
-				}else {
-					homework.HomeworkScore = constant.HOMEWORKSCOREZERO
-				}
-
+			if status.HomeworksInfo[key].HomeworkTitle == homework.HomeworkTitle ||
+				status.HomeworksInfo[key].HomeworkType == homework.HomeworkType{
+				status.HomeworksInfo[key].HomeworkScore = homework.HomeworkScore
 			}
 		}
 	}
 
 	return nil
 }
-
-
-// TODO: update student homework status in database; (just write teacher-side, no student-side)
-func UpdateStudentHomeworkStatus(homeworkInfo []module.HomeworkInfo) error {
-
-
-
-	return nil
-}
-

@@ -39,6 +39,10 @@ const (
 	GETCUMULATIVESCORE = "getCumulativeScore"
 
 	ASSIGNMENT = "assignment"
+
+	PUBLISHHOMEWORK = "publishHomework"
+
+	CHANGESTUDENTHOMEWORKSCORE = "changeStudentHomeworkScore"
 )
 
 const (

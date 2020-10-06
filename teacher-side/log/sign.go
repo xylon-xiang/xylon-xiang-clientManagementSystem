@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-func NewWebsocket(Hub *util.Hub, host string) error {
+func NewWebsocket(Hub *util.Hub, host string, studentName string) error {
 	dialer := websocket.Dialer{
 		ReadBufferSize: 1024,
 		WriteBufferSize: 1024,
@@ -33,6 +33,7 @@ func NewWebsocket(Hub *util.Hub, host string) error {
 	connection := &util.Connection{
 		Conn: conn,
 		IpAddress: host,
+		StudentName: studentName,
 	}
 	(*Hub).Register <- connection
 
