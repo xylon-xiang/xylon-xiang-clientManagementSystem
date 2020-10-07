@@ -20,7 +20,7 @@ func SendLoginHttp(studentId string, studentLogPost module.StudentLogPost) (bool
 
 	urlStr := util.GetRealUrl(hostUrl, studentId)
 
-	logUrl, err := url.Parse(string(urlStr))
+	logUrl, err := url.Parse(urlStr)
 	if err != nil {
 		return false, err
 	}

@@ -1,15 +1,14 @@
 package screenshot
 
 import (
+	"clientManagementSystem/config"
 	"clientManagementSystem/module"
+	"clientManagementSystem/teacher-side/util"
 	"io"
 	"mime/multipart"
 	"os"
+	"strconv"
 )
-
-func UpdateScreenFrozeDuration() {
-
-}
 
 func SaveScreenshot(studentName string, file *multipart.FileHeader) error {
 
@@ -30,7 +29,26 @@ func SaveScreenshot(studentName string, file *multipart.FileHeader) error {
 
 func UpdateScreenFrozenDuration(studentStatus module.StudentStatus) error {
 
+	startDate := strconv.FormatInt(studentStatus.ClassStartDate, 10)
+	filter := map[string]string{
+		"StudentId": studentStatus.StudentId,
+		"ClassName": studentStatus.ClassName,
+		"ClassStartDate": startDate,
+	}
 
+	result, err := util.FindOne(util.STUDENTSTATUS, filter)
+	if err != nil{
+		return err
+	}
 
+	status := result.(module.StudentStatus)
 
+	status.ScreenFrozenDuration += config.Config.APIConfig.ScreenshotAPI.FrozenDuration
+
+	err = util.UpdateOne(util.STUDENTSTATUS, status)
+	if err != nil{
+		return err
+	}
+
+	return nil
 }

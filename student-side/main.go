@@ -7,6 +7,7 @@ import (
 	"clientManagementSystem/student-side/log"
 	"clientManagementSystem/student-side/q_a"
 	"clientManagementSystem/student-side/quiz"
+	"clientManagementSystem/student-side/screenshot"
 	"flag"
 	"fmt"
 	"github.com/gorilla/websocket"
@@ -15,9 +16,21 @@ import (
 	"time"
 )
 
-var websocketConnection *websocket.Conn
+var (
+	websocketConnection *websocket.Conn
+	input               string
+	studentId           string
+	studentName         string
+	studentPassword     string
+	ClassName           string
+	ClassStartDate      int64
+	QuestionContent     string
+)
 
 func main() {
+
+	ClassName = "soft"
+	ClassStartDate = int64(1)
 
 	go startWebsocketListening()
 
@@ -26,13 +39,6 @@ func main() {
 	/*
 		the main function is used to handle input and start specific function
 	*/
-	var (
-		input           string
-		studentId       string
-		studentName     string
-		studentPassword string
-		QuestionContent string
-	)
 
 	for {
 		_, _ = fmt.Scanln(&input)
@@ -46,7 +52,17 @@ func main() {
 			fmt.Println("Please enter the studentName")
 			_, _ = fmt.Scanln(&studentName)
 
-			LogController(studentId, studentPassword)
+			LogController(studentId, studentPassword, studentName)
+
+			// listen screen img change every 5 minutes
+			go func() {
+				err := screenshot.MonitorDesktop(studentId)
+				if err != nil{
+					log2.Printf("monitor desktop error : %v\n", err)
+					return
+				}
+			}()
+
 
 		case constant.QUIZ:
 			fmt.Println("Please enter the Question content:")
@@ -64,13 +80,14 @@ func main() {
 
 }
 
-func LogController(studentId string, studentPassword string) {
+func LogController(studentId string, studentPassword string, studentName string) {
 
 	// FIXME: the class info should be ensured by program
 	studentLogPost := module.StudentLogPost{
+		StudentName:     studentName,
 		StudentPassword: studentPassword,
-		ClassName: "Software Engineering 1210",
-		ClassStartDate: 1601790639,
+		ClassName:       "Software Engineering 1210",
+		ClassStartDate:  1601790639,
 	}
 
 	isPasswordRight, err := log.SendLoginHttp(studentId, studentLogPost)
@@ -104,13 +121,13 @@ func QuizController(studentId string, studentName string, question string) {
 func UploadHomeworkController() {
 
 	status, err := q_a.GetStudentStatus()
-	if err != nil{
+	if err != nil {
 		log2.Printf("get student status err: %v\n", err)
 		return
 	}
 
 	response, err := q_a.UploadHomework(*status)
-	if err != nil{
+	if err != nil {
 		log2.Printf("upload homework err: %v\n", err)
 		return
 	}
@@ -169,6 +186,17 @@ func readWebsocketMessage() {
 			_, msg, err := websocketConnection.ReadMessage()
 			if err != nil {
 				return
+			}
+
+			if string(msg) == "screenshot" {
+				// send screenshot in a new go routine while log2 the error when it is not nil
+				go func() {
+					err := screenshot.SendScreenshot(studentId, ClassName, ClassStartDate)
+					if err != nil {
+						log2.Printf("send screenshot error: %v\n", err)
+						return
+					}
+				}()
 			}
 
 			fmt.Println(string(msg))

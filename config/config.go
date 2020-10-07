@@ -62,6 +62,8 @@ type ScreenshotAPI struct {
 	Method                   string `json:"method"`
 	Path                     string `json:"path"`
 	UpdateFrozenDurationPath string `json:"update_frozen_duration_path"`
+	FrozenDuration           int    `json:"frozen_duration"`
+	ChangeThreshold          int64  `json:"change_threshold"`
 }
 
 var Config ConfigObj

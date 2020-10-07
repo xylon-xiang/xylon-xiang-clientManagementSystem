@@ -11,8 +11,6 @@ import (
 	"os"
 )
 
-// TODO: send the Http POST request
-
 func GetStudentStatus() (*module.StudentStatus, error) {
 
 	file, err := os.Open("test/uploadStatus.json")

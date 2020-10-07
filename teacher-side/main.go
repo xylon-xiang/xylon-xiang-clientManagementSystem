@@ -358,7 +358,11 @@ func ScreenFrozenController(context echo.Context) error {
 		return err
 	}
 
+	err := screenshot.UpdateScreenFrozenDuration(*studentStatus)
+	if err != nil{
+		log2.Printf("update screen frozen duration error: %v\n", err)
+		return err
+	}
 
-
-
+	return context.String(http.StatusOK, "Attention! Your desktop has little change!")
 }
