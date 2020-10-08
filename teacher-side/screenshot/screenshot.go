@@ -8,12 +8,14 @@ import (
 	"mime/multipart"
 	"os"
 	"strconv"
+	"time"
 )
 
 func SaveScreenshot(studentName string, file *multipart.FileHeader) error {
 
 	// save the screenshot at path "/screenshot"
-	dst, err := os.Create("screenshot/" + studentName + "-" +  file.Filename)
+	// time now
+	dst, err := os.Create("screenshot/" + studentName + "-" +  file.Filename + time.Now().String())
 	if err != nil{
 		return err
 	}

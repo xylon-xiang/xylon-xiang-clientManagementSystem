@@ -44,6 +44,7 @@ func main() {
 	e.POST(config.Config.APIConfig.HomeworkAPI.Path, HomeworkController)
 	e.POST(config.Config.APIConfig.HomeworkAPI.FileSavePath, HomeworkFileSaveController)
 
+	// section 4
 	e.POST(config.Config.APIConfig.ScreenshotAPI.Path, ScreenshotController)
 	e.PUT(config.Config.APIConfig.ScreenshotAPI.UpdateFrozenDurationPath, ScreenFrozenController)
 
@@ -126,8 +127,6 @@ func handleInput() {
 			rateStr := strconv.FormatFloat(rate, 'E', -1, 64)
 			fmt.Println("this student's attendance rate: " + rateStr)
 
-		case constant.ASSIGNMENT:
-			AssignmentController()
 
 		case constant.GETCUMULATIVESCORE:
 			//object_operation.QueryCumulativeScore(db.StudentStatus{})
@@ -213,28 +212,14 @@ func QuizController(context echo.Context) error {
 
 	inputMutex = false
 	log2.Printf("hand up: %v \n", quizBody)
-	fmt.Println("please enter your answer")
-	var answer string
-	_, _ = fmt.Scanln(&answer)
-	inputMutex = true
+	//fmt.Println("please enter your answer")
+	//var answer string
+	//_, _ = fmt.Scanln(&answer)
+	//inputMutex = true
 
 	return context.String(http.StatusOK, "I am coming")
 }
 
-func AssignmentController() {
-
-	// TODO: this part of code should be transport as teachers' inputting
-	question := module.HomeworkInfo{
-		HomeworkTitle: "Question 1: how old are you?",
-		HomeworkType:  constant.TEXT,
-	}
-
-	questionStr := fmt.Sprintf("%v", question)
-	byteStream := []byte(questionStr)
-
-	Hub.Broadcast <- byteStream
-
-}
 
 func HomeworkController(context echo.Context) error {
 

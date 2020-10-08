@@ -2,11 +2,10 @@ package main
 
 import (
 	"clientManagementSystem/config"
+	"clientManagementSystem/gui"
 	"clientManagementSystem/module"
 	"clientManagementSystem/student-side/constant"
 	"clientManagementSystem/student-side/log"
-	"clientManagementSystem/student-side/q_a"
-	"clientManagementSystem/student-side/quiz"
 	"clientManagementSystem/student-side/screenshot"
 	"flag"
 	"fmt"
@@ -18,19 +17,18 @@ import (
 
 var (
 	websocketConnection *websocket.Conn
-	input               string
-	studentId           string
-	studentName         string
-	studentPassword     string
-	ClassName           string
-	ClassStartDate      int64
-	QuestionContent     string
+	inputValues         module.InputValue
+	logStatus           chan bool
+	homework            chan string
 )
 
 func main() {
 
-	ClassName = "soft"
-	ClassStartDate = int64(1)
+	//ClassName = "soft"
+	//ClassStartDate = int64(1)
+
+	logStatus = make(chan bool)
+	homework = make(chan string)
 
 	go startWebsocketListening()
 
@@ -40,100 +38,101 @@ func main() {
 		the main function is used to handle input and start specific function
 	*/
 
-	for {
-		_, _ = fmt.Scanln(&input)
+	studentSideGUI := gui.NewGUI(&inputValues)
 
-		switch input {
-		case constant.LOGIN:
-			fmt.Println("Please enter the studentId")
-			_, _ = fmt.Scanln(&studentId)
-			fmt.Println("Please enter the studentPassword")
-			_, _ = fmt.Scanln(&studentPassword)
-			fmt.Println("Please enter the studentName")
-			_, _ = fmt.Scanln(&studentName)
+	GUIShow(studentSideGUI)
 
-			LogController(studentId, studentPassword, studentName)
+	// run in the last
+	studentSideGUI.Application.Run()
 
-			// listen screen img change every 5 minutes
-			go func() {
-				err := screenshot.MonitorDesktop(studentId)
-				if err != nil{
-					log2.Printf("monitor desktop error : %v\n", err)
-					return
-				}
-			}()
+	//
+	//
+	//for {
+	//	_, _ = fmt.Scanln(&input)
+	//
+	//	switch input {
 
-
-		case constant.QUIZ:
-			fmt.Println("Please enter the Question content:")
-			_, _ = fmt.Scanln(&QuestionContent)
-			QuizController(studentId, studentName, QuestionContent)
-
-		case constant.UPLOADHOMEWORK:
-			UploadHomeworkController()
-
-		case constant.LOGOUT:
-			go closeWebsocket(websocketConnection)
-		}
-
-	}
+	//	case constant.UPLOADHOMEWORK:
+	//		UploadHomeworkController()
+	//
+	//	case constant.LOGOUT:
+	//		go closeWebsocket(websocketConnection)
+	//	}
+	//
+	//}
 
 }
 
-func LogController(studentId string, studentPassword string, studentName string) {
+func GUIShow(windows *gui.Windows) {
 
-	// FIXME: the class info should be ensured by program
+	const (
+		LoginWindowsName = "login"
+
+		MainWindowsName = "client management system Student-Side"
+
+		AlarmWindowsName = "alarm"
+	)
+
+	windows.RegisterWindows(LoginWindowsName, 500, 300)
+	windows.AddLoginForm(LoginWindowsName, &inputValues, LogController)
+	loginWindowsHandle := (*windows).WindowsMap[LoginWindowsName]
+
+	windows.RegisterWindows(MainWindowsName, 800, 600)
+	mainWindowsHandle := (*windows).WindowsMap[MainWindowsName]
+
+	(*loginWindowsHandle).Show()
+
+	// read the logStatus
+	go func() {
+		passwordRight := <-logStatus
+
+		if passwordRight {
+
+			// init the main windows
+			//windows.AddAlarmItem("alarm", "Log successful")
+			(*loginWindowsHandle).Close()
+			windows.StudentSideMainWindows(MainWindowsName, &inputValues, &homework)
+			(*mainWindowsHandle).Show()
+
+		} else {
+			windows.RegisterWindows(AlarmWindowsName, 100, 80)
+			alarmWindowsHandle := windows.WindowsMap[AlarmWindowsName]
+			windows.AddAlarmItem(AlarmWindowsName, "log failure, please retry!")
+			(*alarmWindowsHandle).Show()
+		}
+
+	}()
+
+}
+
+func LogController() {
+
 	studentLogPost := module.StudentLogPost{
-		StudentName:     studentName,
-		StudentPassword: studentPassword,
-		ClassName:       "Software Engineering 1210",
-		ClassStartDate:  1601790639,
+		StudentId:       inputValues.StudentId,
+		StudentName:     inputValues.StudentName,
+		StudentPassword: inputValues.StudentPassword,
+		ClassName:       inputValues.ClassName,
+		ClassStartDate:  inputValues.ClassStartDate,
 	}
 
-	isPasswordRight, err := log.SendLoginHttp(studentId, studentLogPost)
+	isPasswordRight, err := log.SendLoginHttp(inputValues.StudentId, studentLogPost)
 	if err != nil {
+
+		logStatus <- false
+
 		log2.Printf("checkpassword: %v\n", err)
 		return
 	}
 
 	if !isPasswordRight {
 
-		/*
-			this part of codes is used to alarming student to change his password
-		*/
+		logStatus <- false
+
 		log2.Printf("wrong password")
-
-		return
-	}
-}
-
-func QuizController(studentId string, studentName string, question string) {
-	answer, err := quiz.HandUp(studentId, studentName, question)
-	if err != nil {
-		log2.Printf("hand up err: %v\n", err)
 		return
 	}
 
-	log2.Printf("answer is: \n%v", answer)
-	return
-}
-
-func UploadHomeworkController() {
-
-	status, err := q_a.GetStudentStatus()
-	if err != nil {
-		log2.Printf("get student status err: %v\n", err)
-		return
-	}
-
-	response, err := q_a.UploadHomework(*status)
-	if err != nil {
-		log2.Printf("upload homework err: %v\n", err)
-		return
-	}
-
-	log2.Println(response)
-
+	logStatus <- true
 }
 
 func startWebsocketListening() {
@@ -157,6 +156,7 @@ func startWebsocketListening() {
 	}
 }
 
+// FIXME: fix the bug in close websocket function
 func closeWebsocket(conn *websocket.Conn) {
 
 	duration := time.Second *
@@ -168,7 +168,7 @@ func closeWebsocket(conn *websocket.Conn) {
 		time.Now().Add(duration))
 
 	if err != nil {
-		log2.Printf("websocketClose: %v", err)
+		log2.Printf("websocketClose error: %v", err)
 		return
 	}
 
@@ -177,7 +177,7 @@ func closeWebsocket(conn *websocket.Conn) {
 	conn.Close()
 }
 
-// this function is used for test
+// this function is used for get message from websocket co-talking with teacher
 func readWebsocketMessage() {
 
 	for {
@@ -191,13 +191,15 @@ func readWebsocketMessage() {
 			if string(msg) == "screenshot" {
 				// send screenshot in a new go routine while log2 the error when it is not nil
 				go func() {
-					err := screenshot.SendScreenshot(studentId, ClassName, ClassStartDate)
+					err := screenshot.SendScreenshot(&inputValues)
 					if err != nil {
 						log2.Printf("send screenshot error: %v\n", err)
 						return
 					}
 				}()
 			}
+
+			homework <- string(msg)
 
 			fmt.Println(string(msg))
 		}

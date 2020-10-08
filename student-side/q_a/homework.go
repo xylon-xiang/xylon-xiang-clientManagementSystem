@@ -11,6 +11,7 @@ import (
 	"os"
 )
 
+// this function is just for getting the test data
 func GetStudentStatus() (*module.StudentStatus, error) {
 
 	file, err := os.Open("test/uploadStatus.json")

@@ -3,6 +3,7 @@ package screenshot
 import (
 	"bytes"
 	"clientManagementSystem/config"
+	"clientManagementSystem/module"
 	"clientManagementSystem/student-side/util"
 	"fmt"
 	"github.com/kbinani/screenshot"
@@ -54,7 +55,7 @@ func getScreenShot() (filePaths []string, err error) {
 	return filePaths, nil
 }
 
-func SendScreenshot(studentId string, className string, classStartDate int64) error {
+func SendScreenshot(inputValues *module.InputValue) error {
 
 	filePaths, err := getScreenShot()
 	if err != nil {
@@ -64,9 +65,12 @@ func SendScreenshot(studentId string, className string, classStartDate int64) er
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 
-	startDate := strconv.FormatInt(classStartDate, 10)
-	_ = writer.WriteField("studentId", studentId)
-	_ = writer.WriteField("className", className)
+	value := *inputValues
+
+	startDate := strconv.FormatInt(value.ClassStartDate, 10)
+	_ = writer.WriteField("studentName", value.StudentName)
+	_ = writer.WriteField("studentId", value.StudentId)
+	_ = writer.WriteField("className", value.ClassName)
 	_ = writer.WriteField("classStartDate", startDate)
 
 	for _, filePath := range filePaths {
@@ -88,7 +92,7 @@ func SendScreenshot(studentId string, className string, classStartDate int64) er
 	// send the multipart/form-data POST Http request
 	hostUrl := config.Config.APIConfig.TeacherHost +
 		config.Config.APIConfig.ScreenshotAPI.Path
-	uri := util.GetRealUrl(hostUrl, studentId)
+	uri := util.GetRealUrl(hostUrl, value.StudentId)
 	req, err := http.NewRequest("POST", uri, body)
 	if err != nil {
 		return err
@@ -166,7 +170,7 @@ func MonitorDesktop(studentId string) error {
 		}
 
 		// if the change between two pictures is less than ChangeThreshold, send report to teacher
-		if diff/sample < config.Config.APIConfig.ScreenshotAPI.ChangeThreshold {
+		if float32(diff)/float32(sample) < config.Config.APIConfig.ScreenshotAPI.ChangeThreshold {
 
 			// send put request to teacher
 			err := ReportFrozenToTeacher(studentId)
