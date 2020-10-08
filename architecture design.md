@@ -167,8 +167,7 @@ end
 
 student ->> teacher: Http POST
 note left of student: POST body contains these infos: <br> · StudentInfo <br> · ClassInfo<br>· SeatInfo <br>· Question
-teacher ->> student: Http return OK(200)
-teacher -->> student: Websocket writeMsg: <br> Questions' Answer
+teacher ->> student: Http return OK(200) <br> with the answer
 ```
 
 `POST		/student/{studentId}`
